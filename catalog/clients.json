@@ -1,0 +1,74 @@
+[
+  {
+    "id": "opencode",
+    "label": "OpenCode / OpenChamber (OpenCode üzerinden)",
+    "capabilityStatus": "unverified",
+    "capabilities": { "skills": "unverified", "mcp": "unverified", "hooks": "unverified", "rules": "unverified" }
+  },
+  {
+    "id": "cursor",
+    "label": "Cursor",
+    "capabilityStatus": "unverified",
+    "capabilities": { "skills": "unverified", "mcp": "unverified", "hooks": "unverified", "rules": "unverified" }
+  },
+  {
+    "id": "antigravity",
+    "label": "Antigravity",
+    "capabilityStatus": "unverified",
+    "capabilities": { "skills": "unverified", "mcp": "unverified", "hooks": "unverified", "rules": "unverified" }
+  },
+  {
+    "id": "antigravity-ide",
+    "label": "Antigravity IDE",
+    "capabilityStatus": "unverified",
+    "capabilities": { "skills": "unverified", "mcp": "unverified", "hooks": "unverified", "rules": "unverified" }
+  },
+  {
+    "id": "claude-code",
+    "label": "Claude Code",
+    "capabilityStatus": "unverified",
+    "capabilities": { "skills": "unverified", "mcp": "unverified", "hooks": "unverified", "rules": "unverified" }
+  },
+  {
+    "id": "claude-desktop",
+    "label": "Claude Desktop",
+    "capabilityStatus": "unverified",
+    "capabilities": { "skills": "unverified", "mcp": "unverified", "hooks": "unverified", "rules": "unverified" }
+  },
+  {
+    "id": "codex-cli",
+    "label": "Codex CLI",
+    "capabilityStatus": "unverified",
+    "capabilities": { "skills": "unverified", "mcp": "unverified", "hooks": "unverified", "rules": "unverified" }
+  },
+  {
+    "id": "codex-desktop",
+    "label": "Codex masaüstü",
+    "capabilityStatus": "unverified",
+    "capabilities": { "skills": "unverified", "mcp": "unverified", "hooks": "unverified", "rules": "unverified" }
+  },
+  {
+    "id": "gemini-cli",
+    "label": "Gemini CLI",
+    "capabilityStatus": "unverified",
+    "capabilities": { "skills": "unverified", "mcp": "unverified", "hooks": "unverified", "rules": "unverified" }
+  },
+  {
+    "id": "gemini-desktop",
+    "label": "Gemini masaüstü",
+    "capabilityStatus": "unverified",
+    "capabilities": { "skills": "unverified", "mcp": "unverified", "hooks": "unverified", "rules": "unverified" }
+  },
+  {
+    "id": "deepseek-harness",
+    "label": "DeepSeek Harness",
+    "capabilityStatus": "unverified",
+    "capabilities": { "skills": "unverified", "mcp": "unverified", "hooks": "unverified", "rules": "unverified" }
+  },
+  {
+    "id": "jan",
+    "label": "Jan",
+    "capabilityStatus": "unverified",
+    "capabilities": { "skills": "unverified", "mcp": "unverified", "hooks": "unverified", "rules": "unverified" }
+  }
+]

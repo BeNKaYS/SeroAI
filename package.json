@@ -1,0 +1,12 @@
+{
+  "name": "seroai",
+  "private": true,
+  "description": "Ajan becerileri, kurallar ve MCP bağlantıları için salt okunur kurulum önizlemesi.",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "bin": { "seroai": "./src/cli/main.mjs" },
+  "scripts": {
+    "start": "node src/cli/main.mjs",
+    "test": "node --test"
+  }
+}

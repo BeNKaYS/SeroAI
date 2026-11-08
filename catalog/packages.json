@@ -1,0 +1,58 @@
+[
+  {
+    "id": "superpowers",
+    "repository": "https://github.com/obra/superpowers",
+    "role": "Geliştirme süreci",
+    "status": "unreviewed",
+    "reviewedRef": null,
+    "license": null
+  },
+  {
+    "id": "graphify",
+    "repository": "https://github.com/Graphify-Labs/graphify",
+    "role": "Kod ve bilgi haritası",
+    "status": "unreviewed",
+    "reviewedRef": null,
+    "license": null
+  },
+  {
+    "id": "caveman",
+    "repository": "https://github.com/JuliusBrussee/caveman",
+    "role": "Kısa anlatım; yalnızca beceriler, proxy ve model yönlendirme yok",
+    "status": "unreviewed",
+    "reviewedRef": null,
+    "license": null
+  },
+  {
+    "id": "ponytail",
+    "repository": "https://github.com/DietrichGebert/ponytail",
+    "role": "Sade ve sürdürülebilir çözümler",
+    "status": "unreviewed",
+    "reviewedRef": null,
+    "license": null
+  },
+  {
+    "id": "karpathy-skills",
+    "repository": "https://github.com/multica-ai/andrej-karpathy-skills",
+    "role": "Odaklı kodlama ilkeleri",
+    "status": "unreviewed",
+    "reviewedRef": null,
+    "license": null
+  },
+  {
+    "id": "impeccable",
+    "repository": "https://github.com/pbakaus/impeccable",
+    "role": "Arayüz tasarımı; izinleri atlayan canlı mod yolu kapsam dışı",
+    "status": "unreviewed",
+    "reviewedRef": null,
+    "license": null
+  },
+  {
+    "id": "github-mcp",
+    "repository": "https://github.com/github/github-mcp-server",
+    "role": "Açıkça yetkilendirilmiş GitHub erişimi",
+    "status": "unreviewed",
+    "reviewedRef": null,
+    "license": null
+  }
+]
