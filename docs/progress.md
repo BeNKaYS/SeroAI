@@ -120,3 +120,16 @@ Ara testler: kaynak katmanı 17/17, ardından tam takım 235/235; güncelleme ç
 Yeni işler: `node:http` tabanlı, 127.0.0.1'e bağlanan ve oturum belirteci üreten sunucu; belirteç/köken/tür/256 KiB gövde denetimi; altı ekranlı derlemesiz arayüz (Genel bakış, Kaynaklar, Proje, Güncelleme, Profil, Hakkında); değişiklik defteri ve tek birincil onay düğmesi; koyu/açık mod, görünür odak ve `aria-live` bildirim. Yazma uçları mevcut plan/apply/rollback fonksiyonlarını çağırır, plan kimliğini yeniden hesaplar; yeni yazma yolu yoktur.
 
 Testler: sunucu/güvenlik 5/5; okuma API'si 6/6; yazma API'si 6/6; statik/a11y 5/5; CLI + canlı sunucu 3/3. Son `node --test`: **286 geçti, 0 başarısız, 0 atlanan**, çıkış kodu 0, süre yaklaşık **5,4 saniye**. Kullanıcı onayıyla panel geçici bir projede tarayıcıda açıldı; masaüstü/mobil, açık/koyu mod, önizleme→uygula→geri alma akışı çalıştı. Kontrolde üç kusur düzeltildi: uygulama sonrası bildirimin silinmesi, geri alma defterinin boş görünmesi, profil listesinin tek sütunda aşırı uzaması. Gerçek kullanıcı ayarına yazım yapılmadı; commit/push yapılmadı. Ayrıntılar: `docs/reports/stage-five.md`.
+
+## Aşama 6: otomatik beceri kurulumu
+
+Kullanıcı, ECC benzeri otomatik kurulumun yeterli olduğunu belirtti; platform olarak yerel web paneli ve ardından kurulum motoru seçildi. Tasarım ve plan:
+
+- `docs/superpowers/specs/2026-11-09-auto-install-design.md`
+- `docs/superpowers/plans/2026-11-09-stage-six-auto-install.md`
+
+`catalog/sources.json` yedi paketi tam commit SHA'sına ve lisansına pinler. `src/install/` altında kaynak/ağaç doğrulama, bağımlılıksız katı tar okuyucu, plan/çakışma, sahiplik durumu, uygulama, rollback, doctor ve uninstall eklendi. CLI: `install`, `install-doctor`, `install-rollback`, `uninstall`. Proje hedefi `.opencode/skills/`, global hedef `~/.config/opencode/skills/`; durum `.git/seroai/install/` veya `~/.seroai/install/`.
+
+Kapsam gerçeği: `karpathy-skills` lisans belirtmediği için, `graphify` upstream CLI olduğu için, `github-mcp` ayar kaydı olduğu için otomatik kurulmaz. Core profili `superpowers`, `caveman`, `ponytail`, `impeccable` paketlerini kurar; diğerlerini gerekçesiyle listeler. Upstream `install.sh`/`npx` çalıştırılmaz.
+
+Testler: kaynak 4/4, tar 6/6, plan 7/7, uygulama 7/7, CLI 4/4. Son `node --test`: **313 geçti, 0 başarısız, 0 atlanan**, çıkış kodu 0, süre yaklaşık **5,4 saniye**. Kullanıcı onayıyla gerçek GitHub arşivleriyle geçici bir projede 44 beceri kuruldu; doctor tümünü `unchanged` gördü ve geri alma tamamlandı. Bu sırada büyük arşiv sınırı, CRLF dönüşümü, indirme zaman aşımı, çalıştırma izni ve 1 MB okuma sınırı düzeltildi. Global kurulum ve gerçek kullanıcı projesi denenmedi; commit/push ayrı onay ister. Ayrıntılar: `docs/reports/stage-six.md`.

@@ -2,7 +2,7 @@
 
 Ajan becerilerini, ortak kuralları ve MCP bağlantılarını tek merkezden yönetmeyi amaçlayan, yerel öncelikli ve onay odaklı bir araç.
 
-> **Durum: `0.1.0-dev.4`, geliştirme sürümü.** Yerel web paneli eklendi: katalog, proje, güncelleme ve profil akışları; her yazma önizleme kimliği ister, değişiklik defteri gösterilir ve panel yalnızca `127.0.0.1` üzerinde çalışır. **286 test geçti.** Canlı istemci bağlantıları doğrulanmadı; npm paketi veya release yayımlanmadı. [Aşama 5 raporu](docs/reports/stage-five.md).
+> **Durum: `0.1.0-dev.5`, geliştirme sürümü.** Pinlenmiş GitHub commit'lerinden beceri kurulumu eklendi: önizleme, onaylı yazım, sahiplik kaydı, doctor, geri alma ve kaldırma. **313 test geçti.** Canlı istemci bağlantıları doğrulanmadı; npm paketi veya release yayımlanmadı. [Aşama 6 raporu](docs/reports/stage-six.md).
 
 SeroAI; seçtiğin araçları ve paketleri tek yerden yönetmeyi, değişiklikleri önce göstermeyi, yedek almayı ve yalnızca desteklenen bağlantıları uygulamayı hedefler. Her uygulamanın aynı özellikleri desteklediği varsayılmaz.
 
@@ -54,6 +54,7 @@ Her uygulama ayrı değerlendirilir. MCP bağlantısı; otomatik oturum kaydı, 
 3. **İncelenmiş uyarlamalar:** doğrulanan uygulamalardan başlayarak kademeli etkinleştirme; desteklenmeyen yolları salt okunur/elle bırakma.
 4. **Güncelleme ve geri yükleme:** yerel klasör ve GitHub kaynakları, sürüm sabitleme, indirme doğrulama, onay ve profil geri yükleme. Güncelleme çekirdeği ve profil aşaması tamamlandı; release yayımı ve canlı GitHub doğrulaması bekliyor.
 5. **Arayüz:** yerel web paneli (`seroai ui`) tamamlandı; masaüstü paketleme ve imzalama sonraki adımdır.
+6. **Otomatik kurulum:** pinlenmiş kaynaklardan beceri kurulumu, sahiplik kaydı, doctor, geri alma ve kaldırma.
 
 Tasarım: [docs/design.md](docs/design.md) · İlk plan: [docs/superpowers/plans/2026-11-08-read-only-foundation.md](docs/superpowers/plans/2026-11-08-read-only-foundation.md)
 
@@ -187,6 +188,38 @@ Panel altı bölüm sunar: Genel bakış, Kaynaklar, Proje, Güncelleme, Profil,
 
 Güvenlik sınırı: panel dış ağa istek atmaz, ağ fontu veya üçüncü taraf betik yüklemez, ham config/token/sohbet göstermez. API çağrıları belirteç, aynı köken (`Origin`) ve `application/json` gövde ister; gövde 256 KiB ile sınırlıdır. Statik dosyalar beyaz listededir. Bu, aynı kullanıcı altındaki kötü niyetli süreçlere karşı tam koruma iddiası değildir; belirteç adres çubuğundadır. [Aşama 5 raporu](docs/reports/stage-five.md).
 
+### Becerileri otomatik kurma
+
+Pinlenmiş GitHub commit'lerinden seçilen becerileri projenin OpenCode keşif klasörüne kur:
+
+```bash
+node src/cli/main.mjs install --project /absolute/path/to/project --profile core --json
+```
+
+Planı incele; yalnızca listelenen beceriler ve commit'ler yazılır. Çıktıdaki `id` ile onayla:
+
+```bash
+node src/cli/main.mjs install --project /absolute/path/to/project --profile core --approve PLAN_ID
+```
+
+Global kurulum yalnızca `--global` açıkça verilirse ve `~/.config/opencode` zaten varsa yapılır:
+
+```bash
+node src/cli/main.mjs install --global --profile core --json
+```
+
+Kurulum `superpowers`, `caveman`, `ponytail` ve `impeccable` paketlerini `.opencode/skills/<beceri>` altına yazar. `karpathy-skills` lisans belirtmediği için, `graphify` kendi CLI aracı olduğu için, `github-mcp` ise ayar kaydı olduğu için otomatik kurulmaz; dışlananlar gerekçesiyle listelenir. MCP için mevcut `opencode-project --github` akışını kullan.
+
+Kurulum yalnızca dosya kopyalar: upstream `install.sh`, `npx` veya indirilen kod **çalıştırılmaz**. Tarball onaydan sonra indirilir; her dosya Git blob SHA-1'i ve boyutuyla doğrulanır. Symlink, hardlink, `..`, mutlak yol ve sınır aşımı reddedilir. Sahiplik kaydı `.git/seroai/install/` (globalde `~/.seroai/install/`) altında tutulur; sahipsiz veya kullanıcı tarafından değiştirilmiş dosya ezilmez.
+
+```bash
+node src/cli/main.mjs install-doctor --project /absolute/path/to/project --json
+node src/cli/main.mjs install-rollback --project /absolute/path/to/project --json
+node src/cli/main.mjs uninstall --project /absolute/path/to/project --package superpowers --json
+```
+
+`install-doctor` hiçbir şeyi değiştirmez. Geri alma ve kaldırma da önizleme + `--approve PLAN_ID` ister; kullanıcı düzenlemesi varsa durur. Aynı becerinin yeni sürüme yükseltilmesi bu sürümde yoktur: önce kaldır, sonra kur.
+
 SeroAI çekirdeğinin daha önce oluşturduğu özel bir klasörü, ayrı bir süreçte salt okunur incelemek için:
 
 ```bash
@@ -218,12 +251,12 @@ Onay kimliği güncel dosya durumuyla eşleşmelidir; eski veya yanlış kimlikl
 - Her seçim için `--client` veya `--package` bayrağını tekrar kullanın; kimlikleri `catalog` komutundan öğrenin.
 - Varsayılan çıktı Türkçedir. `--lang en` İngilizce mesajları seçer; katalogdaki kaynak açıklamaları Türkçe kalır.
 - `catalog`, `setup`, `inspect`, `recover`, OpenCode uyarlama, güncelleme, profil ve `ui` komutları için `--json` kullanılabilir. JSON alan adları ve durum kodları dilden bağımsızdır; uyarı ve hata metinleri seçilen dildedir.
-- Bilinmeyen kimlikler/bayraklar hata verir. `status`, `backup`, `restore` ve `uninstall` uygulanmamıştır; başarı döndürmez.
+- Bilinmeyen kimlikler/bayraklar hata verir. `status`, `backup` ve `restore` uygulanmamıştır; başarı döndürmez.
 - CLI sürümü yalnızca kök `version.json` dosyasından okunur. `package.json`, yanlışlıkla npm’e yayımlanmayı önlemek için `private: true` içerir.
 
 ### Geliştirme testleri
 
-Son tam takım sonucu: **286 geçti, 0 başarısız, 0 atlanan** (`node --test`, yaklaşık 5,4 saniye). CLI testleri geçici HOME ve çalışma dizinleri kullanır; testler tamamlandığında yalnızca kendi geçici dosyalarını temizler. Kurtarma ve güncelleme testleri, oluşturdukları alt süreçleri kontrollü biçimde kapatıp yeni süreç mantığıyla diskten geri almayı sınar. Güncelleme kaynak testleri sahte taşıyıcı kullanır; gerçek GitHub/release çağrısı yapmaz. Panel testleri belirteç, köken, gövde sınırı, statik beyaz liste ve onay kimliğini sınar; görsel/etkileşim kontrolü macOS tarayıcı panelinde masaüstü ve mobil genişlikte, açık/koyu modda yapıldı. Testleri çalıştırmak gerçek ajan kurulumu veya canlı sağlayıcı bağlantısı başlatmaz.
+Son tam takım sonucu: **313 geçti, 0 başarısız, 0 atlanan** (`node --test`, yaklaşık 5,4 saniye). CLI testleri geçici HOME ve çalışma dizinleri kullanır; testler tamamlandığında yalnızca kendi geçici dosyalarını temizler. Kurtarma ve güncelleme testleri, oluşturdukları alt süreçleri kontrollü biçimde kapatıp yeni süreç mantığıyla diskten geri almayı sınar. Otomatik testler güncelleme ve kurulum kaynakları için sahte taşıyıcı kullanır; ayrıca kullanıcı onayıyla gerçek GitHub arşivleri geçici bir projede kurulup geri alındı. Kurulum testleri üretilmiş tar arşivleriyle yol, symlink, checksum, izin ve boyut sınırlarını sınar. Panel testleri belirteç, köken, gövde sınırı, statik beyaz liste ve onay kimliğini sınar; görsel/etkileşim kontrolü macOS tarayıcı panelinde masaüstü ve mobil genişlikte, açık/koyu modda yapıldı. Testleri çalıştırmak gerçek ajan kurulumu veya canlı sağlayıcı bağlantısı başlatmaz.
 
 Mevcut çalışma durumu ve bekleyen onaylar: [docs/progress.md](docs/progress.md).
 

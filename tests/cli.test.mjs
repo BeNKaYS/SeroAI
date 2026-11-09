@@ -90,7 +90,7 @@ test('tekrarlanan seçim bayrakları tekilleştirilir', async t => {
   assert.equal(JSON.parse(result.stdout).items.length, 1);
 });
 
-for (const command of ['backup', 'restore', 'uninstall', 'status']) {
+for (const command of ['backup', 'restore', 'status']) {
   test(`${command} uygulanmadığı için hata verir`, async t => {
     const result = await run(t, [command]);
     assert.equal(result.status, 1);

@@ -27,6 +27,13 @@ Komutlar:
                                                Profili OpenCode projesine geri yükle
   ui [--root <yol>] [--port <0-65535>] [--no-open]
                                                Yerel paneli başlat
+  install --project <yol> [--profile core | --package <id>...]
+  install --global [--profile core | --package <id>...]
+                                               Pinlenmiş becerileri kur (önizleme)
+  install-doctor --project <yol> | --global   Kurulum durumunu denetle
+  install-rollback --project <yol> | --global Son kurulumu geri alma önizlemesi
+  uninstall --project <yol> | --global [--package <id>...]
+                                               Kurulu becerileri kaldır
 
 --client ve --package birden fazla kullanılabilir.
 --lang tr|en ile dil, catalog/setup/inspect/recover/opencode-preview için --json seçilir.
@@ -42,10 +49,13 @@ profile-export stdout'a JSON yazar ve hiçbir dosya oluşturmaz. profile-restore
 açık --map eşlemeleriyle çalışır; OpenCode dışındaki istemciler ertelenmiş sayılır.
 ui yalnızca 127.0.0.1'e bağlanır ve adres oturum belirteci içerir; belirteci paylaşmayın.
 Panel dış ağa istek atmaz. Durdurmak için Ctrl+C kullanın. --no-open tarayıcıyı açmaz.
+install yalnızca lisansı ve dosya yapısı uygun paketleri pinlenmiş GitHub commit'inden
+indirir; onaydan önce hiçbir dosya yazmaz. --global yalnızca açıkça verilirse kullanılır.
+MCP, hook, plugin ve diğer istemciler bu komutla kurulmaz.
 setup hiçbir değişiklik uygulamaz, ayar okumaz ve kurulum yapmaz.
 recover varsayılan olarak salt okunurdur. Yalnızca aynı önizlemenin kimliğiyle
 --approve <id> verilirse dosyalar geri alınır; işlem dosya silebilir.
-backup, restore, uninstall ve status henüz uygulanmadı.`,
+backup, restore ve status henüz uygulanmadı.`,
     packages: 'Kaynaklar (sürüm ve lisans incelemesi bekliyor)',
     clients: 'Hedef uygulamalar (destek doğrulanmadı)',
     preview: 'ÖNİZLEME — Hiçbir değişiklik uygulanmadı. Kurulum yapılmadı.',
@@ -106,6 +116,32 @@ backup, restore, uninstall ve status henüz uygulanmadı.`,
     profileDeferredClient: 'istemcisi bu sürümde uygulanmadı; elle yapılandırılmalıdır.',
     uiStarted: 'SeroAI paneli hazır. Adres oturum belirteci içerir; paylaşmayın. Tarayıcıda açın:',
     uiStopHint: 'Durdurmak için Ctrl+C.',
+    installPreview: 'KURULUM ÖNİZLEMESİ — Hiçbir dosya yazılmadı; içerik indirilmedi.',
+    installTargets: { project: 'Proje hedefi', global: 'Global hedef' },
+    installApplied: 'Kurulum onaylandı; dosyalar doğrulandı ve sahiplik kaydı yazıldı.',
+    installUnchanged: 'Seçilen beceriler zaten kurulu ve değişmemiş; dosya yazılmadı.',
+    installRollbackPreview: 'KURULUM GERİ ALMA ÖNİZLEMESİ — Hiçbir değişiklik uygulanmadı.',
+    installRolledBack: 'Son kurulum geri alındı; önceki sahiplik durumu geri getirildi.',
+    noInstallRollback: 'Geri alınacak kayıtlı kurulum yok; hiçbir değişiklik uygulanmadı.',
+    installInterrupted: 'Yarım kalmış bir kurulum saptandı; geri alma bu işlemi tamamlar.',
+    installDoctor: 'KURULUM DURUMU — Hiçbir dosya değiştirilmedi.',
+    installDoctorEmpty: 'Bu hedefte SeroAI kurulum kaydı yok.',
+    installStates: { unchanged: 'değişmemiş', modified: 'değiştirilmiş', missing: 'eksik', unsafe: 'güvensiz' },
+    uninstallPreview: 'KALDIRMA ÖNİZLEMESİ — Hiçbir dosya silinmedi.',
+    uninstallApplied: 'Seçilen beceriler kaldırıldı; kullanıcı dosyaları korundu.',
+    noUninstall: 'Kaldırılacak kayıtlı beceri yok; hiçbir değişiklik uygulanmadı.',
+    uninstallAction: 'sahipli dosyalar silinecek',
+    installNoLicense: 'lisans yok',
+    installReasons: {
+      'license-missing': 'lisans belirtilmemiş; otomatik kurulmaz',
+      'upstream-cli': 'upstream CLI/araç; dosya kurulumu yok',
+      'config-only': 'ayar kaydı; opencode-project --github kullanın',
+    },
+    installWarnings: [
+      'Kaynaklar GitHub üzerindeki pinlenmiş commitlerden indirilir; upstream davranışı veya kalitesi doğrulanmaz.',
+      'Yalnızca beceri dosyaları kurulur; MCP, hook, plugin, komut ve diğer istemciler değişmez.',
+      'Kurulan dosyalar OpenCode keşif klasörüne yazılır; sonradan yapılan kullanıcı düzenlemeleri ezilmez.',
+    ],
     inspectionWarningTexts: [
       'İnceleme yalnızca sahiplik kaydını mevcut dosyalarla karşılaştırır; yarıda kalan işlemler ve yedekler doğrulanmaz. Kurtarma yapılmaz.',
       'Sahiplik kaydı eksik; bu, kurulumun boş veya sağlıklı olduğunu kanıtlamaz.',
@@ -162,6 +198,15 @@ backup, restore, uninstall ve status henüz uygulanmadı.`,
       UI_PAYLOAD_TOO_LARGE: 'İstek gövdesi 256 KiB sınırını aşıyor.',
       UI_METHOD_NOT_ALLOWED: 'Bu yöntem desteklenmiyor.',
       UI_INVALID_REQUEST: 'İstek gövdesi geçersiz JSON veya bilinmeyen alan içeriyor.',
+      INVALID_INSTALL_SOURCE: 'Kurulum kaynağı geçersiz: pin, lisans veya depo alanı doğrulanamadı.',
+      INSTALL_SOURCE_UNAVAILABLE: 'Kurulum kaynağına ulaşılamadı veya beklenen dosyalar bulunamadı; hiçbir dosya yazılmadı.',
+      INVALID_ARCHIVE: 'İndirilen arşiv güvenli biçimde açılamadı; hiçbir dosya yazılmadı.',
+      INVALID_INSTALL_STATE: 'Kurulum durumu veya sahiplik kaydı güvenli biçimde doğrulanamadı.',
+      INVALID_INSTALL_TARGET: 'Kurulum hedefi güvenli bir istemci klasörü değil. Global kurulumda önce OpenCode yapılandırma klasörü bulunmalıdır.',
+      INSTALL_INTEGRITY_FAILED: 'İndirilen dosya içeriği ağaç kaydıyla eşleşmedi; hiçbir dosya yazılmadı.',
+      INSTALL_APPLY_FAILED: 'Kurulum uygulanamadı; işlem öncesi durum geri getirildi.',
+      DUPLICATE_SKILL: 'Aynı beceri adı iki pakette geçiyor; çakışma nedeniyle işlem durduruldu.',
+      INSTALL_NOT_ALLOWED: 'Bu paket otomatik kuruluma uygun değil: lisans, tür veya dosya yapısı sınırı.',
     },
   },
   en: {
@@ -188,6 +233,13 @@ Commands:
                                                Restore a profile into an OpenCode project
   ui [--root <path>] [--port <0-65535>] [--no-open]
                                                Start the local panel
+  install --project <path> [--profile core | --package <id>...]
+  install --global [--profile core | --package <id>...]
+                                               Install pinned skills (preview)
+  install-doctor --project <path> | --global  Report install state
+  install-rollback --project <path> | --global Preview rolling back the last install
+  uninstall --project <path> | --global [--package <id>...]
+                                               Remove installed skills
 
 Repeat --client and --package to select multiple IDs.
 Use --lang tr|en for language; catalog/setup/inspect/recover/opencode-preview support --json.
@@ -203,10 +255,13 @@ profile-export prints JSON to stdout and creates no files. profile-restore only 
 --map entries; clients other than OpenCode are reported as deferred.
 ui listens on 127.0.0.1 only and its address carries a session token; do not share it.
 The panel makes no outbound requests. Use Ctrl+C to stop. --no-open skips the browser.
+install downloads only licensed, structurally valid packages from pinned GitHub commits;
+it writes nothing before approval. --global is used only when given explicitly.
+MCP, hooks, plugins and other clients are not installed by this command.
 setup applies no changes, reads no client settings and installs nothing.
 recover is read-only by default. Only --approve <id> matching the current
 preview authorizes recovery writes; the operation may delete files.
-backup, restore, uninstall and status are not implemented.`,
+backup, restore and status are not implemented.`,
     packages: 'Sources (version and license review pending)',
     clients: 'Target clients (capabilities unverified)',
     preview: 'PREVIEW — No changes applied. Nothing installed.',
@@ -262,6 +317,32 @@ backup, restore, uninstall and status are not implemented.`,
     profileDeferredClient: 'client is not applied in this version; configure it manually.',
     uiStarted: 'SeroAI panel is ready. The address carries a session token; do not share it. Open in a browser:',
     uiStopHint: 'Press Ctrl+C to stop.',
+    installPreview: 'INSTALL PREVIEW — No files written; no content downloaded.',
+    installTargets: { project: 'Project target', global: 'Global target' },
+    installApplied: 'Install approved; files verified and ownership state written.',
+    installUnchanged: 'Selected skills are already installed and unchanged; no files written.',
+    installRollbackPreview: 'INSTALL ROLLBACK PREVIEW — No changes applied.',
+    installRolledBack: 'The last install was rolled back; the previous ownership state was restored.',
+    noInstallRollback: 'No recorded install to roll back; no changes applied.',
+    installInterrupted: 'An interrupted install was found; rollback completes that transaction.',
+    installDoctor: 'INSTALL STATE — No files changed.',
+    installDoctorEmpty: 'No SeroAI install record for this target.',
+    installStates: { unchanged: 'unchanged', modified: 'modified', missing: 'missing', unsafe: 'unsafe' },
+    uninstallPreview: 'UNINSTALL PREVIEW — No files deleted.',
+    uninstallApplied: 'Selected skills were removed; user files were preserved.',
+    noUninstall: 'No recorded skills to remove; no changes applied.',
+    uninstallAction: 'owned files will be deleted',
+    installNoLicense: 'no license',
+    installReasons: {
+      'license-missing': 'no license declared; not installed automatically',
+      'upstream-cli': 'upstream CLI/tool; no file install',
+      'config-only': 'config entry; use opencode-project --github',
+    },
+    installWarnings: [
+      'Sources are downloaded from pinned GitHub commits; upstream behavior or quality is not verified.',
+      'Only skill files are installed; MCP, hooks, plugins, commands and other clients are unchanged.',
+      'Installed files go to the OpenCode discovery folder; later user edits are never overwritten.',
+    ],
     inspectionWarningTexts: inspectionWarnings,
     warningTexts: warnings,
     errors: {
@@ -311,6 +392,15 @@ backup, restore, uninstall and status are not implemented.`,
       UI_PAYLOAD_TOO_LARGE: 'The request body exceeds the 256 KiB limit.',
       UI_METHOD_NOT_ALLOWED: 'This method is not supported.',
       UI_INVALID_REQUEST: 'The request body is invalid JSON or contains an unknown field.',
+      INVALID_INSTALL_SOURCE: 'Invalid install source: pin, license or repository field failed validation.',
+      INSTALL_SOURCE_UNAVAILABLE: 'The install source is unreachable or lacks expected files; no files were written.',
+      INVALID_ARCHIVE: 'The downloaded archive could not be opened safely; no files were written.',
+      INVALID_INSTALL_STATE: 'Install state or ownership record could not be safely verified.',
+      INVALID_INSTALL_TARGET: 'The install target is not a safe client folder. Global installs require an existing OpenCode configuration folder.',
+      INSTALL_INTEGRITY_FAILED: 'Downloaded content did not match the tree record; no files were written.',
+      INSTALL_APPLY_FAILED: 'The install could not be applied; the previous state was restored.',
+      DUPLICATE_SKILL: 'The same skill name appears in two packages; stopped to avoid a collision.',
+      INSTALL_NOT_ALLOWED: 'This package is not eligible for automatic install: license, kind or layout limit.',
     },
   },
 };

@@ -1,0 +1,69 @@
+{
+  "schema": 1,
+  "sources": [
+    {
+      "id": "superpowers",
+      "repository": "https://github.com/obra/superpowers",
+      "ref": "22f0b463e7a5e579904dd6211a520321035526f7",
+      "license": "MIT",
+      "kind": "skills",
+      "skillsRoot": "skills",
+      "installable": true
+    },
+    {
+      "id": "graphify",
+      "repository": "https://github.com/Graphify-Labs/graphify",
+      "ref": "6c8002eca4acad58db6160eabcb466e61fc35afb",
+      "license": "Apache-2.0",
+      "kind": "tool",
+      "installable": false,
+      "reason": "upstream-cli"
+    },
+    {
+      "id": "caveman",
+      "repository": "https://github.com/JuliusBrussee/caveman",
+      "ref": "3dc497a7f858c774d6e15b25e8c6120ef3a0eda8",
+      "license": "Apache-2.0",
+      "kind": "skills",
+      "skillsRoot": "skills",
+      "installable": true
+    },
+    {
+      "id": "ponytail",
+      "repository": "https://github.com/DietrichGebert/ponytail",
+      "ref": "96608e078b2d5ea607c5c3b8b5a54d1c1fba6846",
+      "license": "MIT",
+      "kind": "skills",
+      "skillsRoot": "skills",
+      "installable": true
+    },
+    {
+      "id": "karpathy-skills",
+      "repository": "https://github.com/multica-ai/andrej-karpathy-skills",
+      "ref": "2c606141936f1eeef17fa3043a72095b4765b9c2",
+      "license": null,
+      "kind": "skills",
+      "skillsRoot": "skills",
+      "installable": false,
+      "reason": "license-missing"
+    },
+    {
+      "id": "impeccable",
+      "repository": "https://github.com/pbakaus/impeccable",
+      "ref": "cf7ea4a8fe56f3e186e9ffaca3124937e36e6430",
+      "license": "Apache-2.0",
+      "kind": "skills",
+      "skillsRoot": ".agents/skills",
+      "installable": true
+    },
+    {
+      "id": "github-mcp",
+      "repository": "https://github.com/github/github-mcp-server",
+      "ref": "6fbcd00b2034502ba3001a49dfaf93593aee7069",
+      "license": "MIT",
+      "kind": "mcp",
+      "installable": false,
+      "reason": "config-only"
+    }
+  ]
+}

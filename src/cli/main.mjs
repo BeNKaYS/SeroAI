@@ -9,14 +9,15 @@ import { createOpenCodePreview } from '../adapters/opencode.mjs';
 import { runOpenCodeProject } from './opencode-project.mjs';
 import { runUpdate, runProfile } from './stage-four.mjs';
 import { runUi } from './ui.mjs';
+import { runInstall } from './install.mjs';
 import { messages, localizePlan, localizeInspection, localizeOpenCodePreview } from './messages.mjs';
 
-const reserved = new Set(['status', 'backup', 'restore', 'uninstall']);
+const reserved = new Set(['status', 'backup', 'restore']);
 const commands = [
   'help', 'version', 'catalog', 'setup', 'inspect', 'recover', 'opencode-preview', 'opencode-project', 'opencode-rollback',
-  'update', 'update-rollback', 'profile-export', 'profile-restore', 'ui',
+  'update', 'update-rollback', 'profile-export', 'profile-restore', 'ui', 'install', 'install-doctor', 'install-rollback', 'uninstall',
 ];
-const jsonCommands = ['catalog', 'setup', 'inspect', 'recover', 'opencode-preview', 'opencode-project', 'opencode-rollback', 'update', 'update-rollback', 'profile-export', 'profile-restore', 'ui'];
+const jsonCommands = [...commands].filter(command => !['help', 'version'].includes(command));
 const sourceCommands = ['opencode-preview', 'opencode-project'];
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const absolute = value => value.length <= 4096 && isAbsolute(value) && !/[\u0000-\u001f]/.test(value);
@@ -50,6 +51,12 @@ function parse(args, options) {
       seen.add(flag);
       continue;
     }
+    if (flag === '--global') {
+      if (!['install', 'install-doctor', 'install-rollback', 'uninstall'].includes(options.command) || seen.has(flag)) badArguments();
+      options.global = true;
+      seen.add(flag);
+      continue;
+    }
     if (!['--lang', '--client', '--package', '--workspace', '--approve', '--skill-dir', '--instruction', '--project', '--root', '--local', '--repo', '--ref', '--name', '--source', '--profile', '--map', '--port'].includes(flag)) badArguments();
     const value = flags[++i];
     if (!value || value.startsWith('-')) badArguments();
@@ -62,15 +69,21 @@ function parse(args, options) {
       options.workspace = value;
       seen.add(flag);
     } else if (flag === '--approve') {
-      if (!['recover', 'opencode-project', 'opencode-rollback', 'update', 'update-rollback', 'profile-restore'].includes(options.command) || seen.has(flag) || !/^[a-f0-9]{64}$/.test(value)) badArguments();
+      if (!['recover', 'opencode-project', 'opencode-rollback', 'update', 'update-rollback', 'profile-restore', 'install', 'install-rollback', 'uninstall'].includes(options.command) || seen.has(flag) || !/^[a-f0-9]{64}$/.test(value)) badArguments();
       options.approval = value;
       seen.add(flag);
     } else if (flag === '--skill-dir' || flag === '--instruction') {
       if (!sourceCommands.includes(options.command)) badArguments();
       options[flag === '--skill-dir' ? 'skillDirectories' : 'instructionFiles'].push(value);
     } else if (flag === '--project') {
-      if (!['opencode-project', 'opencode-rollback', 'profile-restore'].includes(options.command) || seen.has(flag)) badArguments();
+      if (!['opencode-project', 'opencode-rollback', 'profile-restore', 'install', 'install-doctor', 'install-rollback', 'uninstall'].includes(options.command) || seen.has(flag)) badArguments();
       options.project = value;
+      seen.add(flag);
+    } else if (flag === '--profile') {
+      if (seen.has(flag)) badArguments();
+      if (options.command === 'install') { if (value !== 'core') badArguments(); options.profile = value; }
+      else if (options.command === 'profile-restore') { if (!absolute(value)) badArguments(); options.profile = value; }
+      else badArguments();
       seen.add(flag);
     } else if (flag === '--root') {
       if (!['update', 'update-rollback', 'ui'].includes(options.command) || seen.has(flag) || !absolute(value)) badArguments();
@@ -99,16 +112,17 @@ function parse(args, options) {
     } else if (flag === '--source') {
       if (options.command !== 'profile-export' || !/^[a-z][a-z0-9-]{0,39}:(skill|instruction)$/.test(value)) badArguments();
       options.sources.push(value);
-    } else if (flag === '--profile') {
-      if (options.command !== 'profile-restore' || seen.has(flag) || !absolute(value)) badArguments();
-      options.profile = value;
-      seen.add(flag);
     } else if (flag === '--map') {
       if (options.command !== 'profile-restore' || !/^[a-z][a-z0-9-]{0,39}=/.test(value)) badArguments();
       options.mappings.push(value);
     } else {
-      if (!['setup', 'profile-export'].includes(options.command)) badArguments();
-      options[flag === '--client' ? 'clientIds' : 'packageIds'].push(value);
+      if (flag === '--client') {
+        if (!['setup', 'profile-export'].includes(options.command)) badArguments();
+        options.clientIds.push(value);
+      } else {
+        if (!['setup', 'profile-export', 'install', 'uninstall'].includes(options.command)) badArguments();
+        options.packageIds.push(value);
+      }
     }
   }
   if (['inspect', 'recover'].includes(options.command) && !options.workspace) badArguments();
@@ -119,6 +133,10 @@ function parse(args, options) {
     throw Object.assign(new Error('INVALID_SELECTION'), { code: 'INVALID_SELECTION' });
   }
   if (options.command === 'profile-restore' && (!options.profile || !options.project)) badArguments();
+  if (['install', 'install-doctor', 'install-rollback', 'uninstall'].includes(options.command)) {
+    if ((options.project === undefined) === (options.global !== true)) badArguments();
+  }
+  if (options.command === 'install' && options.profile !== null && options.packageIds.length) badArguments();
   return options;
 }
 
@@ -127,6 +145,7 @@ async function main(options) {
   if (reserved.has(options.command)) throw Object.assign(new Error('NOT_IMPLEMENTED'), { code: 'NOT_IMPLEMENTED' });
   if (options.command === 'help') return m.help;
   if (options.command === 'ui') return runUi(options, m, root);
+  if (['install', 'install-doctor', 'install-rollback', 'uninstall'].includes(options.command)) return runInstall(options, m, root);
   if (['update', 'update-rollback'].includes(options.command)) return runUpdate(options, m);
   if (['profile-export', 'profile-restore'].includes(options.command)) return runProfile(options, m, root);
   if (['opencode-project', 'opencode-rollback'].includes(options.command)) return runOpenCodeProject(options, m);
@@ -193,7 +212,7 @@ async function main(options) {
 const options = {
   command: 'help', language: 'tr', json: false, packageIds: [], clientIds: [], skillDirectories: [], instructionFiles: [],
   sources: [], mappings: [], root: null, localSource: null, githubRepository: null, githubRef: null, name: null, profile: null,
-  port: 0, noOpen: false,
+  port: 0, noOpen: false, global: false, profile: null,
 };
 try {
   parse(process.argv.slice(2), options);

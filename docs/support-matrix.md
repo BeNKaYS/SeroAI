@@ -44,3 +44,7 @@ Katalogdaki `unverified` değerleri canlı kurulum doğrulanmadığı için koru
 ## Panel (aşama 5)
 
 `seroai ui` yerel web paneli aynı sınırları taşır: yalnızca mevcut OpenCode V2 proje uyarlamasını, güncelleme akışını ve profili kullanır. Diğer istemciler panelde de manueldir. Panel 127.0.0.1'e bağlanır, dış ağa istek atmaz; oturum belirteci olmadan yazma ucu yoktur. Görsel/etkileşim doğrulaması tek bir macOS tarayıcı oturumunda yapıldı.
+
+## Otomatik beceri kurulumu (aşama 6)
+
+Kurulum yalnızca OpenCode keşif klasörlerini hedefler: proje `.opencode/skills/` ve açık `--global` ile `~/.config/opencode/skills/`. Diğer istemciler ve global ayar dosyaları değiştirilmez. Lisansı belirtilmemiş, upstream CLI olan veya ayar kaydı gerektiren paketler otomatik kurulmaz. MCP, hook ve plugin bu komutun kapsamı dışındadır.
