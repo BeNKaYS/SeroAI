@@ -17,3 +17,6 @@ private/
 *.db-*
 INVENTORY_REPORT.md
 GLOBAL_BASELINE_DESIGN.md
+
+# Tarayıcı paneli ekran görüntüleri (kişisel yollar içerebilir)
+.openchamber/

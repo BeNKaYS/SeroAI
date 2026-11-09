@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>SeroAI</title>
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+<div class="app">
+  <aside class="rail" aria-label="Bölümler">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">S</span>
+      <div>
+        <p class="brand-name">SeroAI</p>
+        <p class="brand-note">Yerel panel</p>
+      </div>
+    </div>
+    <nav class="nav" id="nav" aria-label="Ana bölümler"></nav>
+    <div class="rail-foot">
+      <button id="theme" class="ghost small" type="button" aria-pressed="false">Koyu mod</button>
+      <p class="version" id="version">—</p>
+    </div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <p class="root" id="root">—</p>
+      <p class="local-only">Yalnızca bu bilgisayar</p>
+    </header>
+    <main id="view" tabindex="-1"></main>
+    <div id="flash" class="flash" role="status" aria-live="polite" hidden></div>
+  </div>
+</div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>

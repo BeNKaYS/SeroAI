@@ -1,5 +1,5 @@
 {
-  "surum": "0.1.0-dev.3",
+  "surum": "0.1.0-dev.4",
   "tarih": "2026-11-09",
-  "not": "Yerel klasör ve GitHub kaynaklı, onaylı ve yedekli program güncellemesi; ayrı geri alma; sır içermeyen taşınabilir profil dışa aktarma ve OpenCode projesine geri yükleme."
+  "not": "Yerel web paneli: katalog, proje, güncelleme ve profil akışları; onay kimliğiyle yazma, değişiklik defteri ve yalnızca 127.0.0.1 erişimi."
 }

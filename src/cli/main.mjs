@@ -8,14 +8,15 @@ import { prepareRecovery, recoverWorkspace } from '../core/recovery.mjs';
 import { createOpenCodePreview } from '../adapters/opencode.mjs';
 import { runOpenCodeProject } from './opencode-project.mjs';
 import { runUpdate, runProfile } from './stage-four.mjs';
+import { runUi } from './ui.mjs';
 import { messages, localizePlan, localizeInspection, localizeOpenCodePreview } from './messages.mjs';
 
 const reserved = new Set(['status', 'backup', 'restore', 'uninstall']);
 const commands = [
   'help', 'version', 'catalog', 'setup', 'inspect', 'recover', 'opencode-preview', 'opencode-project', 'opencode-rollback',
-  'update', 'update-rollback', 'profile-export', 'profile-restore',
+  'update', 'update-rollback', 'profile-export', 'profile-restore', 'ui',
 ];
-const jsonCommands = ['catalog', 'setup', 'inspect', 'recover', 'opencode-preview', 'opencode-project', 'opencode-rollback', 'update', 'update-rollback', 'profile-export', 'profile-restore'];
+const jsonCommands = ['catalog', 'setup', 'inspect', 'recover', 'opencode-preview', 'opencode-project', 'opencode-rollback', 'update', 'update-rollback', 'profile-export', 'profile-restore', 'ui'];
 const sourceCommands = ['opencode-preview', 'opencode-project'];
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const absolute = value => value.length <= 4096 && isAbsolute(value) && !/[\u0000-\u001f]/.test(value);
@@ -43,7 +44,13 @@ function parse(args, options) {
       seen.add(flag);
       continue;
     }
-    if (!['--lang', '--client', '--package', '--workspace', '--approve', '--skill-dir', '--instruction', '--project', '--root', '--local', '--repo', '--ref', '--name', '--source', '--profile', '--map'].includes(flag)) badArguments();
+    if (flag === '--no-open') {
+      if (options.command !== 'ui' || seen.has(flag)) badArguments();
+      options.noOpen = true;
+      seen.add(flag);
+      continue;
+    }
+    if (!['--lang', '--client', '--package', '--workspace', '--approve', '--skill-dir', '--instruction', '--project', '--root', '--local', '--repo', '--ref', '--name', '--source', '--profile', '--map', '--port'].includes(flag)) badArguments();
     const value = flags[++i];
     if (!value || value.startsWith('-')) badArguments();
     if (flag === '--lang') {
@@ -66,8 +73,12 @@ function parse(args, options) {
       options.project = value;
       seen.add(flag);
     } else if (flag === '--root') {
-      if (!['update', 'update-rollback'].includes(options.command) || seen.has(flag) || !absolute(value)) badArguments();
+      if (!['update', 'update-rollback', 'ui'].includes(options.command) || seen.has(flag) || !absolute(value)) badArguments();
       options.root = value;
+      seen.add(flag);
+    } else if (flag === '--port') {
+      if (options.command !== 'ui' || seen.has(flag) || !/^\d{1,5}$/.test(value) || Number(value) > 65535) badArguments();
+      options.port = Number(value);
       seen.add(flag);
     } else if (flag === '--local') {
       if (options.command !== 'update' || seen.has(flag) || !absolute(value)) badArguments();
@@ -115,6 +126,7 @@ async function main(options) {
   const m = messages[options.language];
   if (reserved.has(options.command)) throw Object.assign(new Error('NOT_IMPLEMENTED'), { code: 'NOT_IMPLEMENTED' });
   if (options.command === 'help') return m.help;
+  if (options.command === 'ui') return runUi(options, m, root);
   if (['update', 'update-rollback'].includes(options.command)) return runUpdate(options, m);
   if (['profile-export', 'profile-restore'].includes(options.command)) return runProfile(options, m, root);
   if (['opencode-project', 'opencode-rollback'].includes(options.command)) return runOpenCodeProject(options, m);
@@ -181,6 +193,7 @@ async function main(options) {
 const options = {
   command: 'help', language: 'tr', json: false, packageIds: [], clientIds: [], skillDirectories: [], instructionFiles: [],
   sources: [], mappings: [], root: null, localSource: null, githubRepository: null, githubRef: null, name: null, profile: null,
+  port: 0, noOpen: false,
 };
 try {
   parse(process.argv.slice(2), options);

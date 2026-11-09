@@ -112,3 +112,11 @@ Sonraki ana aşama 4’tür: yerel/GitHub güncelleme kaynakları ve profil geri
 - **Profil:** yalnızca mantıksal istemci/paket seçimi ve kaynak anahtarları (`skill`/`instruction`) taşır; yol, token, ham config ve bilinmeyen alan reddedilir. Dışa aktarma stdout’a JSON yazar. Geri yükleme açık `anahtar=/mutlak/yol` eşlemeleri ve mevcut OpenCode proje akışı üzerinden ayrı onay ister; diğer istemciler ertelenmiş sayılır.
 
 Ara testler: kaynak katmanı 17/17, ardından tam takım 235/235; güncelleme çekirdeği 12/12; profil + CLI 14/14. Son doğrulama: `node --test` → **261 geçti, 0 başarısız, 0 atlanan**, çıkış kodu 0, süre yaklaşık **4,8 saniye**. Canlı GitHub API/release çağrısı, gerçek indirme, gerçek kullanıcı ayarına yazım, npm yayını ve commit/push yapılmadı. Release akışı yalnızca sahte taşıyıcıyla sınandı; public release henüz yok. Ayrıntılar ve sınırlar: `docs/reports/stage-four.md`.
+
+## Aşama 5: yerel web paneli
+
+`docs/superpowers/specs/2026-11-09-local-web-ui-design.md` ve `docs/superpowers/plans/2026-11-09-stage-five-web-ui.md` uygulandı. Sürüm `0.1.0-dev.4`. Kullanıcı platform olarak yerel web panelini (`seroai ui`), sakin/MacPaw çizgisini ve onaylı tam akışı seçti.
+
+Yeni işler: `node:http` tabanlı, 127.0.0.1'e bağlanan ve oturum belirteci üreten sunucu; belirteç/köken/tür/256 KiB gövde denetimi; altı ekranlı derlemesiz arayüz (Genel bakış, Kaynaklar, Proje, Güncelleme, Profil, Hakkında); değişiklik defteri ve tek birincil onay düğmesi; koyu/açık mod, görünür odak ve `aria-live` bildirim. Yazma uçları mevcut plan/apply/rollback fonksiyonlarını çağırır, plan kimliğini yeniden hesaplar; yeni yazma yolu yoktur.
+
+Testler: sunucu/güvenlik 5/5; okuma API'si 6/6; yazma API'si 6/6; statik/a11y 5/5; CLI + canlı sunucu 3/3. Son `node --test`: **286 geçti, 0 başarısız, 0 atlanan**, çıkış kodu 0, süre yaklaşık **5,4 saniye**. Kullanıcı onayıyla panel geçici bir projede tarayıcıda açıldı; masaüstü/mobil, açık/koyu mod, önizleme→uygula→geri alma akışı çalıştı. Kontrolde üç kusur düzeltildi: uygulama sonrası bildirimin silinmesi, geri alma defterinin boş görünmesi, profil listesinin tek sütunda aşırı uzaması. Gerçek kullanıcı ayarına yazım yapılmadı; commit/push yapılmadı. Ayrıntılar: `docs/reports/stage-five.md`.

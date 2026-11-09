@@ -25,6 +25,8 @@ Komutlar:
                                                Taşınabilir profil JSON'u üret
   profile-restore --profile <dosya> --project <yol> --map <anahtar=/mutlak/yol>
                                                Profili OpenCode projesine geri yükle
+  ui [--root <yol>] [--port <0-65535>] [--no-open]
+                                               Yerel paneli başlat
 
 --client ve --package birden fazla kullanılabilir.
 --lang tr|en ile dil, catalog/setup/inspect/recover/opencode-preview için --json seçilir.
@@ -38,6 +40,8 @@ birlikte kullanılmaz. Onaydan sonra önce yedek alınır, sonra indirilen açı
 doğrulanarak yazılır. Güncelleme üçüncü taraf paketleri kurmaz; bağımlılık kurulmaz.
 profile-export stdout'a JSON yazar ve hiçbir dosya oluşturmaz. profile-restore yalnızca
 açık --map eşlemeleriyle çalışır; OpenCode dışındaki istemciler ertelenmiş sayılır.
+ui yalnızca 127.0.0.1'e bağlanır ve adres oturum belirteci içerir; belirteci paylaşmayın.
+Panel dış ağa istek atmaz. Durdurmak için Ctrl+C kullanın. --no-open tarayıcıyı açmaz.
 setup hiçbir değişiklik uygulamaz, ayar okumaz ve kurulum yapmaz.
 recover varsayılan olarak salt okunurdur. Yalnızca aynı önizlemenin kimliğiyle
 --approve <id> verilirse dosyalar geri alınır; işlem dosya silebilir.
@@ -100,6 +104,8 @@ backup, restore, uninstall ve status henüz uygulanmadı.`,
     profileApplied: 'Profil yedek alınarak OpenCode projesine uygulandı; diğer istemciler ertelendi.',
     profileNothingApplied: 'Seçili istemciler için uygulanabilir uyarlama yok; hiçbir değişiklik uygulanmadı.',
     profileDeferredClient: 'istemcisi bu sürümde uygulanmadı; elle yapılandırılmalıdır.',
+    uiStarted: 'SeroAI paneli hazır. Adres oturum belirteci içerir; paylaşmayın. Tarayıcıda açın:',
+    uiStopHint: 'Durdurmak için Ctrl+C.',
     inspectionWarningTexts: [
       'İnceleme yalnızca sahiplik kaydını mevcut dosyalarla karşılaştırır; yarıda kalan işlemler ve yedekler doğrulanmaz. Kurtarma yapılmaz.',
       'Sahiplik kaydı eksik; bu, kurulumun boş veya sağlıklı olduğunu kanıtlamaz.',
@@ -149,6 +155,13 @@ backup, restore, uninstall ve status henüz uygulanmadı.`,
       INVALID_PROFILE: 'Profil dosyası geçersiz: bilinmeyen alan, yol, sır veya katalog dışı seçim içeriyor.',
       INVALID_PROFILE_SOURCE: 'Profil kaynağı geçersiz. Anahtar küçük harfli olmalı ve skill veya instruction türü seçilmelidir.',
       INVALID_PROFILE_MAPPING: 'Eşleme geçersiz: her profil kaynağı için mutlak bir yol gerekir; eksik, fazla veya göreli yol kabul edilmez.',
+      UI_NOT_FOUND: 'Arayüz uç noktası bulunamadı.',
+      UI_UNAUTHORIZED: 'Oturum belirteci eksik veya geçersiz. Paneli yeniden başlatın.',
+      UI_FORBIDDEN: 'İstek kaynağı bu panele ait değil; işlem yapılmadı.',
+      UI_UNSUPPORTED_MEDIA: 'Yalnızca application/json gövdesi kabul edilir.',
+      UI_PAYLOAD_TOO_LARGE: 'İstek gövdesi 256 KiB sınırını aşıyor.',
+      UI_METHOD_NOT_ALLOWED: 'Bu yöntem desteklenmiyor.',
+      UI_INVALID_REQUEST: 'İstek gövdesi geçersiz JSON veya bilinmeyen alan içeriyor.',
     },
   },
   en: {
@@ -173,6 +186,8 @@ Commands:
                                                Emit a portable profile JSON
   profile-restore --profile <file> --project <path> --map <key=/absolute/path>
                                                Restore a profile into an OpenCode project
+  ui [--root <path>] [--port <0-65535>] [--no-open]
+                                               Start the local panel
 
 Repeat --client and --package to select multiple IDs.
 Use --lang tr|en for language; catalog/setup/inspect/recover/opencode-preview support --json.
@@ -186,6 +201,8 @@ After approval it writes a backup first, then downloads and verifies the listed 
 It installs no third-party packages or dependencies and never executes downloaded code.
 profile-export prints JSON to stdout and creates no files. profile-restore only uses explicit
 --map entries; clients other than OpenCode are reported as deferred.
+ui listens on 127.0.0.1 only and its address carries a session token; do not share it.
+The panel makes no outbound requests. Use Ctrl+C to stop. --no-open skips the browser.
 setup applies no changes, reads no client settings and installs nothing.
 recover is read-only by default. Only --approve <id> matching the current
 preview authorizes recovery writes; the operation may delete files.
@@ -243,6 +260,8 @@ backup, restore, uninstall and status are not implemented.`,
     profileApplied: 'Profile applied to the OpenCode project with a backup; other clients were deferred.',
     profileNothingApplied: 'No supported adapter for the selected clients; no changes applied.',
     profileDeferredClient: 'client is not applied in this version; configure it manually.',
+    uiStarted: 'SeroAI panel is ready. The address carries a session token; do not share it. Open in a browser:',
+    uiStopHint: 'Press Ctrl+C to stop.',
     inspectionWarningTexts: inspectionWarnings,
     warningTexts: warnings,
     errors: {
@@ -285,6 +304,13 @@ backup, restore, uninstall and status are not implemented.`,
       INVALID_PROFILE: 'Invalid profile file: it contains an unknown field, a path, a secret or a selection outside the catalog.',
       INVALID_PROFILE_SOURCE: 'Invalid profile source. The key must be lowercase and the kind must be skill or instruction.',
       INVALID_PROFILE_MAPPING: 'Invalid mapping: every profile source needs an absolute path; missing, extra or relative paths are rejected.',
+      UI_NOT_FOUND: 'Interface endpoint not found.',
+      UI_UNAUTHORIZED: 'Session token is missing or invalid. Restart the panel.',
+      UI_FORBIDDEN: 'The request does not come from this panel; nothing was changed.',
+      UI_UNSUPPORTED_MEDIA: 'Only an application/json body is accepted.',
+      UI_PAYLOAD_TOO_LARGE: 'The request body exceeds the 256 KiB limit.',
+      UI_METHOD_NOT_ALLOWED: 'This method is not supported.',
+      UI_INVALID_REQUEST: 'The request body is invalid JSON or contains an unknown field.',
     },
   },
 };

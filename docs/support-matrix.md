@@ -40,3 +40,7 @@ Bu liste **SeroAI’ın uyguladığı uyarlamaları** gösterir; uygulamaların 
 Global ayar yazımı; Git dışı projeler ve `.git` dosyalı worktree’ler; V1→V2 göçü; üst dizin/sistem/MDM ayarlarını değiştirme; hesap girişi; GitHub MCP’yi etkinleştirme; upstream paket indirme veya installer çalıştırma; ücretli hizmet/model/proxy/izin/hook değişikliği; sohbet/hafıza/model taşıma. Yerel kaynak hash’i, upstream sürüm/lisans veya becerinin davranış kalitesi incelemesi değildir.
 
 Katalogdaki `unverified` değerleri canlı kurulum doğrulanmadığı için korunur. Bu aşamanın tamamlanması “tüm istemciler otomatik kuruluyor” anlamına gelmez; ilk incelenmiş uyarlamanın kademeli teslimidir.
+
+## Panel (aşama 5)
+
+`seroai ui` yerel web paneli aynı sınırları taşır: yalnızca mevcut OpenCode V2 proje uyarlamasını, güncelleme akışını ve profili kullanır. Diğer istemciler panelde de manueldir. Panel 127.0.0.1'e bağlanır, dış ağa istek atmaz; oturum belirteci olmadan yazma ucu yoktur. Görsel/etkileşim doğrulaması tek bir macOS tarayıcı oturumunda yapıldı.

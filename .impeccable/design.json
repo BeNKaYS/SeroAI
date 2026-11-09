@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-09T16:45:00Z",
+  "title": "Design System: SeroAI",
+  "extensions": {
+    "shadows": [
+      { "name": "card-light", "value": "0 10px 30px -18px rgb(28 31 36 / 45%)", "purpose": "Kart ve ledger yüksekliği; açık mod." },
+      { "name": "card-dark", "value": "0 12px 34px -20px rgb(0 0 0 / 75%)", "purpose": "Kart ve ledger yüksekliği; koyu mod." }
+    ],
+    "motion": [
+      { "name": "ease-rise", "value": "cubic-bezier(0.2, 0.7, 0.2, 1)", "purpose": "Görünüm girişi ve defter satırları; 180–220 ms." },
+      { "name": "state", "value": "120ms ease", "purpose": "Düğme, bağlantı ve input durum geçişleri." }
+    ],
+    "breakpoints": [
+      { "name": "narrow", "value": "900px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Ekranın tek birincil aksiyonu; onay veya önizleme.",
+      "html": "<button class=\"ds-btn\">Uygula</button>",
+      "css": ".ds-btn { background: #2f4bd8; color: #fff; min-height: 44px; padding: 0 18px; border: 1px solid transparent; border-radius: 9px; font: inherit; font-weight: 620; cursor: pointer; } .ds-btn:hover { background: #2a41bd; } .ds-btn:focus-visible { outline: 2px solid #2f4bd8; outline-offset: 2px; } .ds-btn:disabled { opacity: .5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Change Ledger",
+      "kind": "card",
+      "refersTo": "ledger",
+      "description": "Yazma öncesi dosya, eylem ve hash listesi; onay düğmesi sonda.",
+      "html": "<section class=\"ds-ledger\"><h2>Değişiklik defteri</h2><ol><li><span>replace</span><code>src/cli/main.mjs</code></li></ol><button class=\"ds-btn\">Uygula</button></section>",
+      "css": ".ds-ledger { background: #fff; border-radius: 14px; padding: 20px 22px; box-shadow: 0 10px 30px -18px rgb(28 31 36 / 45%); } .ds-ledger ol { position: relative; margin: 0; padding-left: 26px; list-style: none; } .ds-ledger ol::before { content: ''; position: absolute; left: 7px; top: 6px; bottom: 6px; width: 2px; background: #d9d5cb; } .ds-ledger code { font-family: ui-monospace, Menlo, monospace; font-size: .84rem; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Onayı görünür bir değişiklik defterine dönüştüren sakin panel.",
+    "overview": "SeroAI paneli bir Operate yüzeyidir. Ziyaretçi neyin değişeceğini, neyin yedeklendiğini ve nasıl geri alınacağını görür; yazmadan önce onaylar. Dünya tipografi, palet, yoğunluk ve tek imza hareketiyle katılır; navigasyon ve kontroller tanıdık web bileşenleridir.",
+    "keyCharacteristics": [
+      "Sıcak nötr zemin, beyaz kart, tek çivit vurgu",
+      "Tek birincil aksiyon; defter sonunda onay",
+      "Monospace yalnızca hash ve yol için",
+      "Açık ve koyu mod birinci sınıf"
+    ],
+    "rules": [
+      { "name": "Onay görünürlüğü", "body": "Her yazma, önizleme kimliği ve dosya listesi görünmeden etkinleşmez.", "section": "components" },
+      { "name": "Tek yükseklik", "body": "Kartlarda çizgi + gölge birlikte kullanılmaz; yumuşak gölge veya ton farkı seçilir.", "section": "elevation" },
+      { "name": "Durum rengi", "body": "Renk yalnızca anlam taşıdığında kullanılır; dekoratif renk yok.", "section": "colors" }
+    ],
+    "dos": [
+      "Do her ekranda tek birincil aksiyon bırak.",
+      "Do defterde dosya, eylem ve hash göster.",
+      "Do klavye odağını ve aria-live bildirimi koru."
+    ],
+    "donts": [
+      "Don't eyebrow/kicker etiket kullan.",
+      "Don't gradient metin veya süs camı ekle.",
+      "Don't ham config, token veya sohbet göster."
+    ]
+  }
+}

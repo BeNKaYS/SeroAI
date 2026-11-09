@@ -2,7 +2,7 @@
 
 Ajan becerilerini, ortak kuralları ve MCP bağlantılarını tek merkezden yönetmeyi amaçlayan, yerel öncelikli ve onay odaklı bir araç.
 
-> **Durum: `0.1.0-dev.3`, geliştirme sürümü.** Yerel klasör ve GitHub kaynaklı, onaylı/yedekli program güncellemesi, ayrı geri alma ve sır içermeyen taşınabilir profil dışa aktarma/geri yükleme eklendi. **261 test geçti.** Canlı istemci bağlantıları doğrulanmadı; npm paketi veya release yayımlanmadı. [Aşama 4 raporu](docs/reports/stage-four.md).
+> **Durum: `0.1.0-dev.4`, geliştirme sürümü.** Yerel web paneli eklendi: katalog, proje, güncelleme ve profil akışları; her yazma önizleme kimliği ister, değişiklik defteri gösterilir ve panel yalnızca `127.0.0.1` üzerinde çalışır. **286 test geçti.** Canlı istemci bağlantıları doğrulanmadı; npm paketi veya release yayımlanmadı. [Aşama 5 raporu](docs/reports/stage-five.md).
 
 SeroAI; seçtiğin araçları ve paketleri tek yerden yönetmeyi, değişiklikleri önce göstermeyi, yedek almayı ve yalnızca desteklenen bağlantıları uygulamayı hedefler. Her uygulamanın aynı özellikleri desteklediği varsayılmaz.
 
@@ -53,7 +53,7 @@ Her uygulama ayrı değerlendirilir. MCP bağlantısı; otomatik oturum kaydı, 
 2. **Güvenli değişiklikler:** çakışma tespiti, yedekleme, sahiplik kaydı, yarıda kalan işlemi geri alma.
 3. **İncelenmiş uyarlamalar:** doğrulanan uygulamalardan başlayarak kademeli etkinleştirme; desteklenmeyen yolları salt okunur/elle bırakma.
 4. **Güncelleme ve geri yükleme:** yerel klasör ve GitHub kaynakları, sürüm sabitleme, indirme doğrulama, onay ve profil geri yükleme. Güncelleme çekirdeği ve profil aşaması tamamlandı; release yayımı ve canlı GitHub doğrulaması bekliyor.
-5. **İsteğe bağlı arayüz:** CLI yaşam döngüsü güvenilir olduktan sonra masaüstü arayüzü.
+5. **Arayüz:** yerel web paneli (`seroai ui`) tamamlandı; masaüstü paketleme ve imzalama sonraki adımdır.
 
 Tasarım: [docs/design.md](docs/design.md) · İlk plan: [docs/superpowers/plans/2026-11-08-read-only-foundation.md](docs/superpowers/plans/2026-11-08-read-only-foundation.md)
 
@@ -173,6 +173,20 @@ node src/cli/main.mjs profile-restore --profile /absolute/path/seroai-profile.js
 
 Her profil kaynağı için bir eşleme gerekir; eksik, fazla veya göreli yol kabul edilmez. Önizlemedeki `id` ile `--approve PREVIEW_ID` verilmeden yazılmaz. Uygulama mevcut OpenCode proje akışını kullanır: yedek `.git/seroai/opencode/` altında tutulur, yorumlar korunur, GitHub MCP kapalı kalır. OpenCode dışındaki istemciler “ertelendi” olarak raporlanır; uygulanmış sayılmaz. Kaynaklar otomatik indirilmez.
 
+### Yerel panel (`ui`)
+
+Aynı çekirdeği tarayıcıda kullanmak için:
+
+```bash
+node src/cli/main.mjs ui
+```
+
+Komut rastgele bir boş bağlantı noktasında yalnızca `127.0.0.1`'e bağlanır, adresi yazar ve tarayıcıyı açar. Adres bir oturum belirteci (`?token=...`) taşır; **paylaşmayın**. `--no-open` tarayıcıyı açmaz, `--port <0-65535>` sabit bağlantı noktası seçer, `--root <mutlak-yol>` panelin katalog kökünü belirler (varsayılan: SeroAI deposu). Durdurmak için `Ctrl+C`.
+
+Panel altı bölüm sunar: Genel bakış, Kaynaklar, Proje, Güncelleme, Profil, Hakkında. Her yazma önce “değişiklik defteri” gösterir; onay düğmesi aynı önizleme kimliğini kullanır. Panelde `--yes` yoktur; kimlik eskirse işlem `STALE_PLAN` ile durur.
+
+Güvenlik sınırı: panel dış ağa istek atmaz, ağ fontu veya üçüncü taraf betik yüklemez, ham config/token/sohbet göstermez. API çağrıları belirteç, aynı köken (`Origin`) ve `application/json` gövde ister; gövde 256 KiB ile sınırlıdır. Statik dosyalar beyaz listededir. Bu, aynı kullanıcı altındaki kötü niyetli süreçlere karşı tam koruma iddiası değildir; belirteç adres çubuğundadır. [Aşama 5 raporu](docs/reports/stage-five.md).
+
 SeroAI çekirdeğinin daha önce oluşturduğu özel bir klasörü, ayrı bir süreçte salt okunur incelemek için:
 
 ```bash
@@ -203,13 +217,13 @@ Onay kimliği güncel dosya durumuyla eşleşmelidir; eski veya yanlış kimlikl
 
 - Her seçim için `--client` veya `--package` bayrağını tekrar kullanın; kimlikleri `catalog` komutundan öğrenin.
 - Varsayılan çıktı Türkçedir. `--lang en` İngilizce mesajları seçer; katalogdaki kaynak açıklamaları Türkçe kalır.
-- `catalog`, `setup`, `inspect`, `recover` ve OpenCode uyarlama komutları için `--json` kullanılabilir. JSON alan adları ve durum kodları dilden bağımsızdır; uyarı ve hata metinleri seçilen dildedir.
+- `catalog`, `setup`, `inspect`, `recover`, OpenCode uyarlama, güncelleme, profil ve `ui` komutları için `--json` kullanılabilir. JSON alan adları ve durum kodları dilden bağımsızdır; uyarı ve hata metinleri seçilen dildedir.
 - Bilinmeyen kimlikler/bayraklar hata verir. `status`, `backup`, `restore` ve `uninstall` uygulanmamıştır; başarı döndürmez.
 - CLI sürümü yalnızca kök `version.json` dosyasından okunur. `package.json`, yanlışlıkla npm’e yayımlanmayı önlemek için `private: true` içerir.
 
 ### Geliştirme testleri
 
-Son tam takım sonucu: **261 geçti, 0 başarısız, 0 atlanan** (`node --test`, yaklaşık 4,8 saniye). CLI testleri geçici HOME ve çalışma dizinleri kullanır; testler tamamlandığında yalnızca kendi geçici dosyalarını temizler. Kurtarma ve güncelleme testleri, oluşturdukları alt süreçleri kontrollü biçimde kapatıp yeni süreç mantığıyla diskten geri almayı sınar. Güncelleme kaynak testleri sahte taşıyıcı kullanır; gerçek GitHub/release çağrısı yapmaz. Testleri çalıştırmak gerçek ajan kurulumu veya canlı sağlayıcı bağlantısı başlatmaz. Bu sonuç kurulu uygulamayla canlı bağlantının doğrulandığı anlamına gelmez.
+Son tam takım sonucu: **286 geçti, 0 başarısız, 0 atlanan** (`node --test`, yaklaşık 5,4 saniye). CLI testleri geçici HOME ve çalışma dizinleri kullanır; testler tamamlandığında yalnızca kendi geçici dosyalarını temizler. Kurtarma ve güncelleme testleri, oluşturdukları alt süreçleri kontrollü biçimde kapatıp yeni süreç mantığıyla diskten geri almayı sınar. Güncelleme kaynak testleri sahte taşıyıcı kullanır; gerçek GitHub/release çağrısı yapmaz. Panel testleri belirteç, köken, gövde sınırı, statik beyaz liste ve onay kimliğini sınar; görsel/etkileşim kontrolü macOS tarayıcı panelinde masaüstü ve mobil genişlikte, açık/koyu modda yapıldı. Testleri çalıştırmak gerçek ajan kurulumu veya canlı sağlayıcı bağlantısı başlatmaz.
 
 Mevcut çalışma durumu ve bekleyen onaylar: [docs/progress.md](docs/progress.md).
 
