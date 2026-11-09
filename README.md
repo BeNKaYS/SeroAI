@@ -2,7 +2,7 @@
 
 Ajan becerilerini, ortak kuralları ve MCP bağlantılarını tek merkezden yönetmeyi amaçlayan, yerel öncelikli ve onay odaklı bir araç.
 
-> **Durum: `0.1.0-dev.5`, geliştirme sürümü.** Pinlenmiş GitHub commit'lerinden beceri kurulumu eklendi: önizleme, onaylı yazım, sahiplik kaydı, doctor, geri alma ve kaldırma. **313 test geçti.** Canlı istemci bağlantıları doğrulanmadı; npm paketi veya release yayımlanmadı. [Aşama 6 raporu](docs/reports/stage-six.md).
+> **Durum: `0.1.0-dev.6`, geliştirme sürümü.** Pinlenmiş GitHub commit'lerinden beceri kurulumu eklendi: terminalde tek komut, planı görüp `evet` ile onaylama, sahiplik kaydı, doctor, geri alma ve kaldırma. **314 test geçti.** Canlı istemci bağlantıları doğrulanmadı; npm paketi veya release yayımlanmadı. [Aşama 6 raporu](docs/reports/stage-six.md).
 
 SeroAI; seçtiğin araçları ve paketleri tek yerden yönetmeyi, değişiklikleri önce göstermeyi, yedek almayı ve yalnızca desteklenen bağlantıları uygulamayı hedefler. Her uygulamanın aynı özellikleri desteklediği varsayılmaz.
 
@@ -193,6 +193,14 @@ Güvenlik sınırı: panel dış ağa istek atmaz, ağ fontu veya üçüncü tar
 Pinlenmiş GitHub commit'lerinden seçilen becerileri projenin OpenCode keşif klasörüne kur:
 
 ```bash
+node src/cli/main.mjs install --project /absolute/path/to/project --profile core
+```
+
+Bir terminalde çalıştırıldığında planı yazdırır ve **tek onay** ister: `evet` yazarsanız aynı plan kimliğiyle kurar; Enter ile iptal edilir. `--json` veya terminal dışı çalıştırmada yalnızca önizleme üretir; betikler `--approve` kullanmalıdır. Örnekteki yolu kendi projenizin mutlak yoluyla değiştirin.
+
+İki adımlı (inceledikten sonra onaylama) akış:
+
+```bash
 node src/cli/main.mjs install --project /absolute/path/to/project --profile core --json
 ```
 
@@ -256,7 +264,7 @@ Onay kimliği güncel dosya durumuyla eşleşmelidir; eski veya yanlış kimlikl
 
 ### Geliştirme testleri
 
-Son tam takım sonucu: **313 geçti, 0 başarısız, 0 atlanan** (`node --test`, yaklaşık 5,4 saniye). CLI testleri geçici HOME ve çalışma dizinleri kullanır; testler tamamlandığında yalnızca kendi geçici dosyalarını temizler. Kurtarma ve güncelleme testleri, oluşturdukları alt süreçleri kontrollü biçimde kapatıp yeni süreç mantığıyla diskten geri almayı sınar. Otomatik testler güncelleme ve kurulum kaynakları için sahte taşıyıcı kullanır; ayrıca kullanıcı onayıyla gerçek GitHub arşivleri geçici bir projede kurulup geri alındı. Kurulum testleri üretilmiş tar arşivleriyle yol, symlink, checksum, izin ve boyut sınırlarını sınar. Panel testleri belirteç, köken, gövde sınırı, statik beyaz liste ve onay kimliğini sınar; görsel/etkileşim kontrolü macOS tarayıcı panelinde masaüstü ve mobil genişlikte, açık/koyu modda yapıldı. Testleri çalıştırmak gerçek ajan kurulumu veya canlı sağlayıcı bağlantısı başlatmaz.
+Son tam takım sonucu: **314 geçti, 0 başarısız, 0 atlanan** (`node --test`, yaklaşık 5,3 saniye). CLI testleri geçici HOME ve çalışma dizinleri kullanır; testler tamamlandığında yalnızca kendi geçici dosyalarını temizler. Kurtarma ve güncelleme testleri, oluşturdukları alt süreçleri kontrollü biçimde kapatıp yeni süreç mantığıyla diskten geri almayı sınar. Otomatik testler güncelleme ve kurulum kaynakları için sahte taşıyıcı kullanır; ayrıca kullanıcı onayıyla gerçek GitHub arşivleri geçici bir projede kurulup geri alındı. Kurulum testleri üretilmiş tar arşivleriyle yol, symlink, checksum, izin ve boyut sınırlarını sınar. Panel testleri belirteç, köken, gövde sınırı, statik beyaz liste ve onay kimliğini sınar; görsel/etkileşim kontrolü macOS tarayıcı panelinde masaüstü ve mobil genişlikte, açık/koyu modda yapıldı. Testleri çalıştırmak gerçek ajan kurulumu veya canlı sağlayıcı bağlantısı başlatmaz.
 
 Mevcut çalışma durumu ve bekleyen onaylar: [docs/progress.md](docs/progress.md).
 

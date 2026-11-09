@@ -1,6 +1,6 @@
 # Aşama 6 kabulü — otomatik beceri kurulumu
 
-Tarih: 2026-11-09 · Sürüm: `0.1.0-dev.5` · Tasarım: `docs/superpowers/specs/2026-11-09-auto-install-design.md` · Plan: `docs/superpowers/plans/2026-11-09-stage-six-auto-install.md`
+Tarih: 2026-11-09 · Sürüm: `0.1.0-dev.6` · Tasarım: `docs/superpowers/specs/2026-11-09-auto-install-design.md` · Plan: `docs/superpowers/plans/2026-11-09-stage-six-auto-install.md`
 
 ## Ne eklendi
 
@@ -36,6 +36,7 @@ Dosyalar:
 - Varsayılan proje hedefi: `<proje>/.opencode/skills/<beceri>`; global hedef yalnızca `--global`: `~/.config/opencode/skills/<beceri>`. Ek `skills` config dizisi yazılmaz; OpenCode bu klasörleri keşfeder.
 - Durum: proje `.git/seroai/install/`, global `~/.seroai/install/` (0700/0600). `state.json` sahipli dosyaları SHA-256 ile kaydeder; `latest.json` son işlemi izler.
 - Önizleme yalnızca GitHub ağaç metadatasını ve mevcut durumu okur; tarball onaydan sonra indirilir. Her dosya Git blob SHA-1 + boyut ile doğrulanır.
+- Terminalde `install` komutu planı yazdırır ve yalnızca `evet` sözcüğüyle uygular. `--json` veya TTY dışı çalıştırmada yalnızca önizleme üretir; betikler `--approve <id>` kullanır. `--yes` yoktur.
 - Tarball yalnızca `codeload.github.com` ve ağaç `api.github.com`; HTTPS, yönlendirme denetimi, 24 MiB indirme / 64 MiB açılmış / 5000 girdi / 2 MiB dosya sınırı.
 - Tar okuyucu symlink, hardlink, aygıt, mutlak yol, `..`, ters bölü ve yinelenen yolu reddeder; checksum doğrular.
 - Yazım: tüm paketler önce geçici alanda doğrulanır; hedefler rename ile taşınır; durum en son yazılır. Hata halinde taşınan klasörler ve önceki durum geri getirilir.
@@ -50,8 +51,8 @@ Dosyalar:
 | `tests/install-tar.test.mjs` | Katı tar okuyucu | 6/6 |
 | `tests/install-plan.test.mjs` | Plan/çakışma | 7/7 |
 | `tests/install-apply.test.mjs` | Uygulama/rollback/uninstall | 7/7 |
-| `tests/install-cli.test.mjs` | CLI | 4/4 |
-| **Tam takım** | `node --test` | **313/313 geçti, 0 başarısız, 0 atlanan** (yaklaşık 5,4 sn) |
+| `tests/install-cli.test.mjs` | CLI + rehberli onay | 5/5 |
+| **Tam takım** | `node --test` | **314/314 geçti, 0 başarısız, 0 atlanan** (yaklaşık 5,3 sn) |
 
 Sınananlar: onaysız sıfır yazım; yanlış/eski kimlik; lisanssız ve araç paketi reddi; core dışlamaları; symlink/hardlink/traversal/bozuk checksum/limit; aynı beceri adı çakışması; sahipsiz hedef; bozulmuş tarball’da kısmi durum bırakmama; ikinci paket kurulumu ve yalnızca onu geri alma; kullanıcı düzenlemesinde durma; uninstall; hedef sonradan belirirse stale; global kurulum; bayrak/komut doğrulaması.
 
@@ -62,6 +63,7 @@ Kullanıcı onayıyla geçici bir Git projesinde gerçek GitHub ağaçları ve t
 - Önizleme: 4 paket, **44 beceri**, 201 dosya (`superpowers` 15, `caveman` 22, `ponytail` 6, `impeccable` 1). Dışlananlar gerekçeleriyle listelendi.
 - Uygulama: 44 beceri `.opencode/skills/` altına yazıldı; `install-doctor` tüm becerileri `unchanged` bildirdi.
 - Geri alma: 44 beceri kaldırıldı, önceki durum geri geldi; doctor `installed: false`.
+- Rehberli mod: bir pty üzerinde `install --package superpowers` planı yazdırdı, `evet` onayıyla 15 beceri kurdu. `--json` ve TTY dışı çalıştırmada yalnızca önizleme üretir.
 
 Canlı denemede bulunan ve düzeltilen gerçek dünya sorunları:
 

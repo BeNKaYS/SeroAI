@@ -1,5 +1,5 @@
 {
-  "surum": "0.1.0-dev.5",
+  "surum": "0.1.0-dev.6",
   "tarih": "2026-11-09",
-  "not": "Pinlenmiş GitHub commitlerinden beceri kurulumu: önizleme, onaylı yazım, sahiplik kaydı, doctor, geri alma ve kaldırma. Lisanssız ve araç paketleri otomatik kurulmaz."
+  "not": "Rehberli tek komut kurulumu: plan yazdırılır, terminalde 'evet' onayıyla uygulanır; TTY dışında ve --json ile yalnızca önizleme kalır."
 }

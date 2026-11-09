@@ -2,9 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
+import { PassThrough } from 'node:stream';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { confirmGuidedInstall } from '../src/cli/install.mjs';
 
 const cli = fileURLToPath(new URL('../src/cli/main.mjs', import.meta.url));
 
@@ -82,4 +84,13 @@ test('git olmayan proje ve bilinmeyen paket reddedilir', async t => {
   const unknown = run(['install', '--project', join(parent, 'project'), '--package', 'unknown', '--json']);
   assert.equal(unknown.status, 1);
   assert.equal(JSON.parse(unknown.stderr).error.code, 'UNKNOWN_PACKAGE');
+});
+
+test('rehberli onay yalnızca "evet" sözcüğünü kabul eder', async () => {
+  for (const [input, expected] of [['evet\n', true], [' EVET \n', true], ['e\n', false], ['yes\n', false], ['\n', false]]) {
+    const source = new PassThrough();
+    source.end(input);
+    const output = new PassThrough();
+    assert.equal(await confirmGuidedInstall({}, { input: source, output }), expected, JSON.stringify(input));
+  }
 });

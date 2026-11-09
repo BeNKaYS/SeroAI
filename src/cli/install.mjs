@@ -1,7 +1,20 @@
+import { createInterface } from 'node:readline/promises';
 import { failure } from '../core/safe-files.mjs';
 import { installContext } from '../install/state.mjs';
 import { planInstall, planInstallRollback, planUninstall, doctorInstall } from '../install/plan.mjs';
 import { applyInstall, rollbackInstall, uninstallSkills } from '../install/apply.mjs';
+
+export async function confirmGuidedInstall(plan, { input = process.stdin, output = process.stdout } = {}) {
+  const rl = createInterface({ input, output });
+  try {
+    const answer = await rl.question('Kurulumu onaylıyor musunuz? Onaylamak için "evet" yazın (iptal için Enter): ');
+    return answer.trim().toLocaleLowerCase('tr') === 'evet';
+  } catch {
+    return false;
+  } finally {
+    rl.close();
+  }
+}
 
 function contextFor(options) {
   return installContext(options.global === true ? { global: true } : { project: options.project });
@@ -40,7 +53,7 @@ export async function runInstall(options, messages, appRoot) {
       ...plan.skills.map(name => `  ${name}`),
       ...(plan.interrupted ? [messages.installInterrupted] : []),
       ...messages.installWarnings.map(warning => `${messages.warning}: ${warning}`),
-      `${messages.recoveryApproval} --approve ${plan.id}`,
+      `${messages.installApproval} --approve ${plan.id}`,
     ].join('\n');
   }
   if (options.command === 'uninstall') {
@@ -58,7 +71,7 @@ export async function runInstall(options, messages, appRoot) {
       messages.uninstallPreview,
       `  ${targetText(context, messages)}`,
       ...plan.actions.map(action => `  ${action.skill}: ${messages.uninstallAction}`),
-      `${messages.recoveryApproval} --approve ${plan.id}`,
+      `${messages.installApproval} --approve ${plan.id}`,
     ].join('\n');
   }
   const plan = await planInstall({
@@ -74,12 +87,20 @@ export async function runInstall(options, messages, appRoot) {
       : result.unchanged ? messages.installUnchanged : `${messages.installApplied}\n  ${result.skills.join(', ')}`;
   }
   if (options.json) return JSON.stringify({ ...plan, warnings: messages.installWarnings }, null, 2);
-  return [
+  const previewText = [
     messages.installPreview,
     `  ${targetText(context, messages)}`,
     ...plan.packages.map(item => `  ${item.id}@${item.ref.slice(0, 12)} (${item.license ?? messages.installNoLicense}): ${item.skills.map(skill => skill.name).join(', ')}`),
     ...plan.exclusions.map(item => `  ${messages.warning}: ${item.id} — ${messages.installReasons[item.reason] ?? item.reason}`),
     ...messages.installWarnings.map(warning => `${messages.warning}: ${warning}`),
-    `${messages.recoveryApproval} --approve ${plan.id}`,
+    `${messages.installApproval} --approve ${plan.id}`,
   ].join('\n');
+  if (process.stdin.isTTY && process.stdout.isTTY) {
+    process.stdout.write(`${previewText}\n${messages.installConfirm}\n`);
+    const confirmed = await confirmGuidedInstall(plan);
+    if (!confirmed) return messages.installCancelled;
+    const result = await applyInstall(plan, { approvedPlanId: plan.id });
+    return result.unchanged ? messages.installUnchanged : `${messages.installApplied}\n  ${result.skills.join(', ')}`;
+  }
+  return previewText;
 }
