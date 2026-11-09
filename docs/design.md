@@ -56,7 +56,7 @@ Herkese açık kaynak deposu, kişisel tercihler için yedek hedefi değildir. K
 
 ## Doğrulama politikası
 
-Test, lint, build, duman testi, tarayıcı kontrolü veya canlı sağlayıcı çağrısından önce mevcut kullanıcıdan izin istenir. Test dosyası yazmak, onları çalıştırma yetkisi vermez. Bu ilk hazırlık sırasında otomatik CI akışı eklenmez. Yerel hazırlık dosyaları yayımlanmadan önce açık commit/push onayı istenir.
+Kullanıcı, her geliştirme adımı sonunda ilgili yerel otomatik testlerin ve tam regresyon takımının çalıştırılmasına sürekli onay verdi; aynı test izni tekrar tekrar sorulmaz. Bu onay lint, build, duman testi, tarayıcı kontrolü, canlı sağlayıcı çağrısı, gerçek ajan ayarı değişikliği veya kurulum için genel yetki değildir; bunlarda ayrıca izin istenir. Test dosyası yazmak tek başına çalıştırma yetkisi vermez. Bu ilk hazırlık sırasında otomatik CI akışı eklenmez. Yeni dosyalar yayımlanmadan önce açık commit/push onayı istenir.
 
 ## İlk aşamanın kapsam dışıları
 

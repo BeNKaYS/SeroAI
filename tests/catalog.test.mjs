@@ -41,7 +41,7 @@ test('katalog yedi temel kaynağı ve doğrulanmamış uygulamaları içerir', a
     assert.equal(client.capabilityStatus, 'unverified');
     assert.deepEqual(Object.values(client.capabilities), Array(4).fill('unverified'));
   }
-  assert.equal(catalog.version.surum, '0.1.0-dev.1');
+  assert.match(catalog.version.surum, /^\d+\.\d+\.\d+-dev\.\d+$/);
 });
 
 const invalidCases = [

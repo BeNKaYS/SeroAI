@@ -1,12 +1,19 @@
 {
   "name": "seroai",
   "private": true,
-  "description": "Ajan becerileri, kurallar ve MCP bağlantıları için salt okunur kurulum önizlemesi.",
+  "description": "Ajan becerileri, kurallar ve MCP bağlantıları için onaylı, yedekli proje ayarı yönetimi.",
   "type": "module",
-  "engines": { "node": ">=22" },
-  "bin": { "seroai": "./src/cli/main.mjs" },
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "seroai": "./src/cli/main.mjs"
+  },
   "scripts": {
     "start": "node src/cli/main.mjs",
     "test": "node --test"
+  },
+  "dependencies": {
+    "jsonc-parser": "3.3.1"
   }
 }

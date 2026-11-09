@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtemp, mkdir, writeFile, readFile, readdir, symlink, readlink, rm } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, symlink, readlink, rm, realpath as fsRealpath } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createManagedWorkspace } from '../src/core/workspace.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const cli = join(root, 'src/cli/main.mjs');
@@ -89,7 +90,7 @@ test('tekrarlanan seçim bayrakları tekilleştirilir', async t => {
   assert.equal(JSON.parse(result.stdout).items.length, 1);
 });
 
-for (const command of ['update', 'backup', 'restore', 'uninstall', 'status']) {
+for (const command of ['backup', 'restore', 'uninstall', 'status']) {
   test(`${command} uygulanmadığı için hata verir`, async t => {
     const result = await run(t, [command]);
     assert.equal(result.status, 1);
@@ -97,6 +98,13 @@ for (const command of ['update', 'backup', 'restore', 'uninstall', 'status']) {
     assert.equal(result.stdout, '');
   });
 }
+
+test('update eksik hedef/kaynakla hiçbir şey yazmaz', async t => {
+  const result = await run(t, ['update', '--json']);
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.equal(JSON.parse(result.stderr).error.code, 'INVALID_ARGUMENTS');
+});
 
 for (const args of [
   ['unknown'], ['--unknown'], [...setup, '--force'], [...setup, 'extra'],
@@ -106,6 +114,8 @@ for (const args of [
   ['catalog', '--client', 'opencode'], ['version', '--json'],
   ['setup'], ['setup', '--client', 'opencode'],
   [...setup, '--package', 'unknown'], [...setup, '--client', 'unknown'],
+  ['inspect'], ['inspect', '--workspace'], ['inspect', '--workspace', '/one', '--workspace', '/two'],
+  ['catalog', '--workspace', '/one'], ['inspect', '--client', 'opencode'],
 ]) {
   test(`geçersiz komut reddedilir: ${args.join(' ')}`, async t => {
     const result = await run(t, args);
@@ -121,4 +131,30 @@ test('JSON hatası yapılandırılmıştır ve İngilizce seçimini korur', asyn
   const error = JSON.parse(result.stderr).error;
   assert.equal(error.code, 'UNKNOWN_PACKAGE');
   assert.match(error.message, /Unknown package/);
+});
+
+test('inspect yeni CLI sürecinde kalıcı sahiplik kaydını JSON olarak okur', async t => {
+  const parent = await mkdtemp(join(await fsRealpath(tmpdir()), 'seroai-cli-inspect-'));
+  t.after(() => rm(parent, { recursive: true, force: true }));
+  const workspace = await createManagedWorkspace(parent, { approved: true });
+  const plan = await workspace.prepare([{ path: 'rules.md', content: 'Kurallar' }]);
+  await workspace.apply(plan, { approvedPlanId: plan.id });
+  const result = await run(t, ['inspect', '--workspace', workspace.root, '--json']);
+  assert.equal(result.status, 0);
+  const inspection = JSON.parse(result.stdout);
+  assert.equal(inspection.mode, 'inspection');
+  assert.equal(inspection.changesApplied, false);
+  assert.deepEqual(inspection.files, [{ path: 'rules.md', status: 'unchanged' }]);
+  assert.match(inspection.warnings.join(' '), /Kurtarma yapılmaz\./);
+  const english = await run(t, ['inspect', '--workspace', workspace.root, '--lang', 'en']);
+  assert.equal(english.status, 0);
+  assert.match(english.stdout, /INSPECTION/);
+  assert.match(english.stdout, /unchanged/);
+});
+
+test('inspect geçersiz kökte yerel yolu sızdırmadan hata verir', async t => {
+  const result = await run(t, ['inspect', '--workspace', '/PRIVATE_NONEXISTENT_PATH', '--json']);
+  assert.equal(result.status, 1);
+  assert.equal(JSON.parse(result.stderr).error.code, 'INVALID_WORKSPACE');
+  assert.ok(!result.stderr.includes('PRIVATE_NONEXISTENT_PATH'));
 });

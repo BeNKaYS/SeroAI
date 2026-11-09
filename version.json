@@ -1,5 +1,5 @@
 {
-  "surum": "0.1.0-dev.1",
-  "tarih": "2026-11-08",
-  "not": "Salt okunur katalog ve kurulum önizlemesi. Kurulum, güncelleme ve geri alma henüz uygulanmadı."
+  "surum": "0.1.0-dev.3",
+  "tarih": "2026-11-09",
+  "not": "Yerel klasör ve GitHub kaynaklı, onaylı ve yedekli program güncellemesi; ayrı geri alma; sır içermeyen taşınabilir profil dışa aktarma ve OpenCode projesine geri yükleme."
 }
